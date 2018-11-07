@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>600</width>
+    <height>691</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Hit the target!</string>
+  </property>
+  <property name="autoFillBackground">
+   <bool>false</bool>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">QProgressBar:horizontal {
+background: red;
+}
+QProgressBar::chunk:horizontal {
+background: green;
+}</string>
+  </property>
+  <widget class="QWidget" name="centralWidget">
+   <layout class="QGridLayout" name="gridLayout">
+    <item row="2" column="2">
+     <widget class="QLabel" name="hitsLabel">
+      <property name="font">
+       <font>
+        <pointsize>40</pointsize>
+       </font>
+      </property>
+      <property name="text">
+       <string>Level 1</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+     </widget>
+    </item>
+    <item row="6" column="2">
+     <widget class="OpenGLWidget" name="openGLWidget">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="mouseTracking">
+       <bool>true</bool>
+      </property>
+      <property name="focusPolicy">
+       <enum>Qt::StrongFocus</enum>
+      </property>
+     </widget>
+    </item>
+    <item row="5" column="2">
+     <widget class="QLabel" name="label">
+      <property name="text">
+       <string>Não encoste no inimigo.</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="2">
+     <widget class="QProgressBar" name="progressBar">
+      <property name="autoFillBackground">
+       <bool>true</bool>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">QProgressBar:horizontal {
+background: rgb(0, 255, 0);
+text-align: center;
+}</string>
+      </property>
+      <property name="maximum">
+       <number>25</number>
+      </property>
+      <property name="value">
+       <number>25</number>
+      </property>
+      <property name="textVisible">
+       <bool>true</bool>
+      </property>
+      <property name="format">
+       <string>HP</string>
+      </property>
+     </widget>
+    </item>
+    <item row="4" column="2">
+     <widget class="QProgressBar" name="progressBar_2">
+      <property name="styleSheet">
+       <string notr="true">QProgressBar:horizontal {
+background: rgb(0, 85, 255);
+text-align: center;
+}</string>
+      </property>
+      <property name="value">
+       <number>0</number>
+      </property>
+      <property name="format">
+       <string>Level</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>OpenGLWidget</class>
+   <extends>QOpenGLWidget</extends>
+   <header>openglwidget.h</header>
+   <container>1</container>
+   <slots>
+    <signal>updateHitsLabel(QString)</signal>
+    <signal>setLabelText(QString)</signal>
+    <signal>updateHP(int)</signal>
+    <signal>updateLevel(int)</signal>
+    <slot>toggleBackgroundColor(bool)</slot>
+    <slot>changeDiagonal()</slot>
+   </slots>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>openGLWidget</sender>
+   <signal>updateHitsLabel(QString)</signal>
+   <receiver>hitsLabel</receiver>
+   <slot>setText(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>299</x>
+     <y>382</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>299</x>
+     <y>42</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>openGLWidget</sender>
+   <signal>updateHP(int)</signal>
+   <receiver>progressBar</receiver>
+   <slot>setValue(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>299</x>
+     <y>416</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>299</x>
+     <y>110</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>openGLWidget</sender>
+   <signal>updateLevel(int)</signal>
+   <receiver>progressBar_2</receiver>
+   <slot>setValue(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>299</x>
+     <y>431</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>299</x>
+     <y>141</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>
