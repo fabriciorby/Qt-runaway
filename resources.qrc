@@ -3,4 +3,8 @@
         <file>fshader1.glsl</file>
         <file>vshader1.glsl</file>
     </qresource>
+    <qresource prefix="/textures">
+        <file>lava.jpg</file>
+        <file>metal.jpg</file>
+    </qresource>
 </RCC>

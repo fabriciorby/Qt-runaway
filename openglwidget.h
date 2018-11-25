@@ -11,6 +11,7 @@ class OpenGLWidget : public QOpenGLWidget, protected QOpenGLExtraFunctions
 {
     Q_OBJECT
 
+    GLuint vboNormals = 0;
     GLuint vboVertices = 0;
     GLuint vboColors = 0;
     GLuint vboIndices = 0;
@@ -18,7 +19,8 @@ class OpenGLWidget : public QOpenGLWidget, protected QOpenGLExtraFunctions
     GLuint vao = 0;
     GLuint vao2 = 0;
 
-    std::unique_ptr<QVector4D []> vertices = nullptr;
+    std::unique_ptr<QVector3D []> normals;
+    std::unique_ptr<QVector4D []> vertices;
     std::unique_ptr<QVector4D []> colors = nullptr;
     std::unique_ptr<unsigned int[]> indices = nullptr;
 
@@ -49,11 +51,19 @@ class OpenGLWidget : public QOpenGLWidget, protected QOpenGLExtraFunctions
 public:
     explicit OpenGLWidget (QWidget *parent = 0);
 
+    void createNormals();
+
     void createVBOs();
     void createShaders();
 
     void destroyVBOs();
     void destroyShaders();
+
+    std::unique_ptr <QVector2D []> texCoords;
+    void createTexCoords();
+    GLuint vboTexCoords = 0;
+    GLuint textureID = 0;
+    void loadTexture();
 
 protected:
     void initializeGL();
