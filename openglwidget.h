@@ -16,6 +16,7 @@ class OpenGLWidget : public QOpenGLWidget, protected QOpenGLExtraFunctions
     GLuint vboIndices = 0;
 
     GLuint vao = 0;
+    GLuint vao2 = 0;
 
     std::unique_ptr<QVector4D []> vertices = nullptr;
     std::unique_ptr<QVector4D []> colors = nullptr;

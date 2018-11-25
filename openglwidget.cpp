@@ -62,6 +62,9 @@ void OpenGLWidget::paintGL()
     glUniform1f(locScaling, 0.2);
     glDrawElements(GL_TRIANGLES, 2 * 3, GL_UNSIGNED_INT, 0);
 
+
+    glBindVertexArray(vao2);
+
     // Target
     glUniform4f(locTranslation, targetPosX, targetPosY, 0, 0);
     glUniform1f(locScaling, 0.2);
@@ -220,8 +223,36 @@ void OpenGLWidget::createVBOs()
     indices[4] = 3;
     indices[5] = 0;
 
+    //VAO player
+
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
+
+    glGenBuffers(1, &vboVertices);
+    glBindBuffer(GL_ARRAY_BUFFER, vboVertices);
+    glBufferData(GL_ARRAY_BUFFER, 4 * sizeof(QVector4D), vertices.get(), GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, nullptr);
+    glEnableVertexAttribArray(0);
+
+    glGenBuffers(1, &vboColors);
+    glBindBuffer(GL_ARRAY_BUFFER, vboColors);
+    glBufferData(GL_ARRAY_BUFFER, 4 * sizeof(QVector4D), colors.get(), GL_STATIC_DRAW);
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, nullptr);
+    glEnableVertexAttribArray(1);
+
+    glGenBuffers(1, &vboIndices);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vboIndices);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, 2 * 3 * sizeof(unsigned int), indices.get(), GL_DYNAMIC_DRAW);
+
+    //VAO inimigo
+
+    colors[0] = QVector4D(1, 0, 0, 1); // red
+    colors[1] = QVector4D(1, 0, 0, 1); // red
+    colors[2] = QVector4D(1, 0, 0, 1); // red
+    colors[3] = QVector4D(1, 0, 0, 1); // red
+
+    glGenVertexArrays(1, &vao2);
+    glBindVertexArray(vao2);
 
     glGenBuffers(1, &vboVertices);
     glBindBuffer(GL_ARRAY_BUFFER, vboVertices);
@@ -246,11 +277,13 @@ void OpenGLWidget::destroyVBOs()
     glDeleteBuffers(1, &vboColors);
     glDeleteBuffers(1, &vboIndices);
     glDeleteVertexArrays(1, &vao);
+    glDeleteVertexArrays(1, &vao2);
 
     vboVertices = 0;
     vboIndices = 0;
     vboColors = 0;
     vao = 0;
+    vao2 = 0;
 }
 
 void OpenGLWidget::animate()
