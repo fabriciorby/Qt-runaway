@@ -54,28 +54,34 @@ void OpenGLWidget::paintGL()
 
     GLuint locScaling = glGetUniformLocation(shaderProgram, "scaling");
     GLuint locTranslation = glGetUniformLocation(shaderProgram, "translation");
+    GLuint locColorTexture = 0;
 
     glUseProgram(shaderProgram);
 
-    glBindVertexArray(vao);           
-
     // Player
+    glActiveTexture(GL_TEXTURE0);
+    glBindVertexArray(vao);
+
     glUniform4f(locTranslation, playerPosX, playerPosY, 0, 0);
     glUniform1f(locScaling, 0.2);
 
-    GLuint locColorTexture = glGetUniformLocation(shaderProgram, "colorTexture");
+    locColorTexture = glGetUniformLocation(shaderProgram, "colorTexture");
     glUniform1i(locColorTexture, 0);
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, textureID);
+    glBindTexture(GL_TEXTURE_2D, texturas[0]);
     glDrawElements(GL_TRIANGLES, 2 * 3, GL_UNSIGNED_INT, 0);
 
-    glBindVertexArray(vao2);
 
     // Target
+    glActiveTexture(GL_TEXTURE1);
+    glBindVertexArray(vao2);
+
     glUniform4f(locTranslation, targetPosX, targetPosY, 0, 0);
     glUniform1f(locScaling, 0.2);
-    glDrawElements(GL_TRIANGLES, 2 * 3, GL_UNSIGNED_INT, 0);
 
+    locColorTexture = glGetUniformLocation(shaderProgram, "colorTexture");
+    glUniform1i(locColorTexture, 1);
+    glBindTexture(GL_TEXTURE_2D, texturas[1]);
+    glDrawElements(GL_TRIANGLES, 2 * 3, GL_UNSIGNED_INT, 0);
 }
 
 void OpenGLWidget::createShaders()
@@ -365,19 +371,39 @@ void OpenGLWidget::createTexCoords(){
 
 void OpenGLWidget::loadTexture()
 {
+
+    glDeleteTextures(2, texturas);
+
     QImage image;
     image.load(":/textures/metal.jpg");
     image = image.convertToFormat(QImage::Format_RGBA8888);
 
-    if (textureID)
-    {
-        glDeleteTextures(1, &textureID);
-    }
-    glGenTextures(1 , &textureID);
-    glBindTexture(GL_TEXTURE_2D, textureID);
+    QImage image1;
+    image1.load(":/textures/lava.jpg");
+    image1 = image1.convertToFormat(QImage::Format_RGBA8888);
+
+    glGenTextures(2, texturas);
+
+    //seta como ativa textura 0
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texturas[0]);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image.width(), image.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, image.bits());
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+    //seta a repetição da imagem como espelhada
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glGenerateMipmap(GL_TEXTURE_2D);
+
+    //seta como ativa textura 1
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, texturas[1]) ;
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image1.width(), image1.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, image1.bits());
+
+    //seta a repetição da imagem como espelhada
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glGenerateMipmap(GL_TEXTURE_2D);

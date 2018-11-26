@@ -63,6 +63,7 @@ public:
     void createTexCoords();
     GLuint vboTexCoords = 0;
     GLuint textureID = 0;
+    GLuint texturas[2];
     void loadTexture();
 
 protected:

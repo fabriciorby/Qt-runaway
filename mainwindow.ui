@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Hit the target!</string>
+   <string>Runaway</string>
   </property>
   <property name="autoFillBackground">
    <bool>false</bool>
@@ -70,7 +70,7 @@ background: green;
     <item row="3" column="2">
      <widget class="QProgressBar" name="progressBar">
       <property name="autoFillBackground">
-       <bool>true</bool>
+       <bool>false</bool>
       </property>
       <property name="styleSheet">
        <string notr="true">QProgressBar:horizontal {
@@ -119,10 +119,16 @@ text-align: center;
    <header>openglwidget.h</header>
    <container>1</container>
    <slots>
+    <signal>statusBarMessage(QString)</signal>
+    <signal>enableComboShaders(bool)</signal>
     <signal>updateHitsLabel(QString)</signal>
     <signal>setLabelText(QString)</signal>
     <signal>updateHP(int)</signal>
     <signal>updateLevel(int)</signal>
+    <slot>showFileOpenDialog()</slot>
+    <slot>changeShader(int)</slot>
+    <slot>loadTexture()</slot>
+    <slot>loadTextureLayer()</slot>
     <slot>toggleBackgroundColor(bool)</slot>
     <slot>changeDiagonal()</slot>
    </slots>
