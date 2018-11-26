@@ -32,6 +32,8 @@ void OpenGLWidget::initializeGL()
     qDebug("OpenGL version: %s", glGetString(GL_VERSION));
     qDebug("GLSL %s", glGetString(GL_SHADING_LANGUAGE_VERSION));
 
+    loadTexture();
+
     createShaders();
     createVBOs();
 
@@ -52,21 +54,34 @@ void OpenGLWidget::paintGL()
 
     GLuint locScaling = glGetUniformLocation(shaderProgram, "scaling");
     GLuint locTranslation = glGetUniformLocation(shaderProgram, "translation");
+    GLuint locColorTexture = 0;
 
     glUseProgram(shaderProgram);
 
-    glBindVertexArray(vao);           
-
     // Player
+    glActiveTexture(GL_TEXTURE0);
+    glBindVertexArray(vao);
+
     glUniform4f(locTranslation, playerPosX, playerPosY, 0, 0);
     glUniform1f(locScaling, 0.2);
+
+    locColorTexture = glGetUniformLocation(shaderProgram, "colorTexture");
+    glUniform1i(locColorTexture, 0);
+    glBindTexture(GL_TEXTURE_2D, texturas[0]);
     glDrawElements(GL_TRIANGLES, 2 * 3, GL_UNSIGNED_INT, 0);
+
 
     // Target
+    glActiveTexture(GL_TEXTURE1);
+    glBindVertexArray(vao2);
+
     glUniform4f(locTranslation, targetPosX, targetPosY, 0, 0);
     glUniform1f(locScaling, 0.2);
-    glDrawElements(GL_TRIANGLES, 2 * 3, GL_UNSIGNED_INT, 0);
 
+    locColorTexture = glGetUniformLocation(shaderProgram, "colorTexture");
+    glUniform1i(locColorTexture, 1);
+    glBindTexture(GL_TEXTURE_2D, texturas[1]);
+    glDrawElements(GL_TRIANGLES, 2 * 3, GL_UNSIGNED_INT, 0);
 }
 
 void OpenGLWidget::createShaders()
@@ -220,6 +235,11 @@ void OpenGLWidget::createVBOs()
     indices[4] = 3;
     indices[5] = 0;
 
+    createTexCoords();
+    createNormals();
+
+    //VAO player
+
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
 
@@ -229,15 +249,57 @@ void OpenGLWidget::createVBOs()
     glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, nullptr);
     glEnableVertexAttribArray(0);
 
-    glGenBuffers(1, &vboColors);
-    glBindBuffer(GL_ARRAY_BUFFER, vboColors);
-    glBufferData(GL_ARRAY_BUFFER, 4 * sizeof(QVector4D), colors.get(), GL_STATIC_DRAW);
-    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, nullptr);
+    glGenBuffers(1, &vboIndices);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vboIndices);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, 2 * 3 * sizeof(unsigned int), indices.get(), GL_DYNAMIC_DRAW);
+
+    glGenBuffers(1, &vboTexCoords);
+    glBindBuffer(GL_ARRAY_BUFFER, vboTexCoords);
+    glBufferData(GL_ARRAY_BUFFER, 4*sizeof(QVector2D), //4 é o numero de vertices
+    texCoords.get(), GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, vboTexCoords);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
+    glEnableVertexAttribArray(2);
+
+    glGenBuffers(1, &vboNormals);
+    glBindBuffer(GL_ARRAY_BUFFER, vboNormals);
+    glBufferData(GL_ARRAY_BUFFER, 4 * sizeof(QVector3D), normals.get(), GL_STATIC_DRAW);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
     glEnableVertexAttribArray(1);
+
+    //VAO inimigo
+
+    colors[0] = QVector4D(1, 0, 0, 1); // red
+    colors[1] = QVector4D(1, 0, 0, 1); // red
+    colors[2] = QVector4D(1, 0, 0, 1); // red
+    colors[3] = QVector4D(1, 0, 0, 1); // red
+
+    glGenVertexArrays(1, &vao2);
+    glBindVertexArray(vao2);
+
+    glGenBuffers(1, &vboVertices);
+    glBindBuffer(GL_ARRAY_BUFFER, vboVertices);
+    glBufferData(GL_ARRAY_BUFFER, 4 * sizeof(QVector4D), vertices.get(), GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, nullptr);
+    glEnableVertexAttribArray(0);
 
     glGenBuffers(1, &vboIndices);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vboIndices);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, 2 * 3 * sizeof(unsigned int), indices.get(), GL_DYNAMIC_DRAW);
+
+    glGenBuffers(1, &vboTexCoords);
+    glBindBuffer(GL_ARRAY_BUFFER, vboTexCoords);
+    glBufferData(GL_ARRAY_BUFFER, 4*sizeof(QVector2D), //4 é o numero de vertices
+    texCoords.get(), GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, vboTexCoords);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
+    glEnableVertexAttribArray(2);
+
+    glGenBuffers(1, &vboNormals);
+    glBindBuffer(GL_ARRAY_BUFFER, vboNormals);
+    glBufferData(GL_ARRAY_BUFFER, 4 * sizeof(QVector3D), normals.get(), GL_STATIC_DRAW);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+    glEnableVertexAttribArray(1);
 }
 
 void OpenGLWidget::destroyVBOs()
@@ -245,12 +307,108 @@ void OpenGLWidget::destroyVBOs()
     glDeleteBuffers(1, &vboVertices);
     glDeleteBuffers(1, &vboColors);
     glDeleteBuffers(1, &vboIndices);
+    glDeleteBuffers(1, &vboTexCoords);
     glDeleteVertexArrays(1, &vao);
+    glDeleteVertexArrays(1, &vao2);
 
+    vboTexCoords = 0;
     vboVertices = 0;
     vboIndices = 0;
     vboColors = 0;
     vao = 0;
+    vao2 = 0;
+}
+
+void OpenGLWidget::createNormals()
+{
+    normals = std::make_unique<QVector3D[]>(4);
+
+    for ( unsigned int i = 0; i < 2 ; ++i )
+    {
+        unsigned int a , b , c ;
+
+        //captura os índices da face
+        a = indices [ i * 3 + 0];
+        b = indices [ i * 3 + 1];
+        c = indices [ i * 3 + 2];
+
+        //calcula a normal da face
+        QVector3D normal = QVector3D::normal(vertices[a].toVector3D(),vertices[b].toVector3D(),vertices[c].toVector3D());
+
+        //soma em cada vértice desta face
+        normals[a] += normal;
+        normals[b] += normal;
+        normals[c] += normal;
+    }
+
+    //normaliza tudo depois
+    for ( unsigned int i = 0; i < 4 ; ++i )
+    {
+        normals[i].normalize();
+    }
+}
+
+void OpenGLWidget::createTexCoords(){
+    unsigned int numVertices = 4; //magic numbers
+
+    texCoords = std::make_unique <QVector2D []>(numVertices);
+    // Compute minimum and maximum values
+    auto minz = std::numeric_limits <float>::max();
+    auto maxz = std::numeric_limits <float>::lowest();
+    for (unsigned int i = 0; i<numVertices; ++i)
+    {
+        minz = std::min(vertices[i].z(), minz);
+        maxz = std::max(vertices[i].z(), maxz);
+    }
+    for (unsigned int i = 0; i<numVertices; ++i)
+    {
+        auto s = ( std::atan2(vertices[i].y(), vertices[i].x()) + M_PI)/(2 * M_PI);
+        auto t = 1.0f - (vertices[i].z() - minz)/(maxz - minz);
+        texCoords [i] = QVector2D(s, t);
+    }
+
+}
+
+void OpenGLWidget::loadTexture()
+{
+
+    glDeleteTextures(2, texturas);
+
+    QImage image;
+    image.load(":/textures/metal.jpg");
+    image = image.convertToFormat(QImage::Format_RGBA8888);
+
+    QImage image1;
+    image1.load(":/textures/lava.jpg");
+    image1 = image1.convertToFormat(QImage::Format_RGBA8888);
+
+    glGenTextures(2, texturas);
+
+    //seta como ativa textura 0
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texturas[0]);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image.width(), image.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, image.bits());
+
+    //seta a repetição da imagem como espelhada
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glGenerateMipmap(GL_TEXTURE_2D);
+
+    //seta como ativa textura 1
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, texturas[1]) ;
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image1.width(), image1.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, image1.bits());
+
+    //seta a repetição da imagem como espelhada
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glGenerateMipmap(GL_TEXTURE_2D);
+
+    update();
 }
 
 void OpenGLWidget::animate()
